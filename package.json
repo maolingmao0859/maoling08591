@@ -14,7 +14,8 @@
     "cms:migrate": "payload migrate",
     "cms:migrate:create": "payload migrate:create",
     "cms:test": "payload run tests/cms.ts",
-    "cms:test:cleanup": "payload run tests/cleanup.ts"
+    "cms:test:cleanup": "payload run tests/cleanup.ts",
+    "cms:admin:reset": "payload run scripts/create-admin.ts reset"
   },
   "dependencies": {
     "@payloadcms/db-sqlite": "3.90.2",
