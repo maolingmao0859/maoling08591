@@ -1,0 +1,42 @@
+import assert from 'node:assert/strict';
+import {randomBytes} from 'node:crypto';
+import {writeFile,mkdir} from 'node:fs/promises';
+import {getPayload} from 'payload';
+import config from '../payload.config';
+const base=process.env.CMS_TEST_URL||'http://localhost:3010';
+if(!['localhost','127.0.0.1'].includes(new URL(base).hostname)||!process.env.DATABASE_URI?.includes('production-test'))throw new Error('测试只能在本地独立 production-test 数据库运行。');
+const cms=await getPayload({config});
+const check=(message:string)=>console.log(`PASS ${message}`);
+const email=`cms-test-${Date.now()}@example.invalid`,password=randomBytes(24).toString('hex');
+let adminId:number|undefined,projectId:number|undefined,mediaId:number|undefined;
+const call=(path:string,method='GET',data?:unknown,token?:string)=>fetch(base+path,{method,headers:{...(data?{'Content-Type':'application/json'}:{}),...(token?{Authorization:`JWT ${token}`}:{})},body:data?JSON.stringify(data):undefined,redirect:'manual'});
+try{
+ assert.equal((await call('/api/users/first-register','POST',{email,password})).status,403);check('public first-admin registration denied');
+ for(const [path,method] of [['/api/projects','POST'],['/api/media','POST'],['/api/journal','POST'],['/api/globals/site-settings','POST'],['/api/users','POST']]){const r=await call(path,method,{});assert.ok([401,403].includes(r.status),`${path}: ${r.status}`)}check('all anonymous content/account writes denied');
+ assert.ok([302,303,307].includes((await call('/preview')).status));check('draft preview requires administrator login');
+ const user=await cms.create({collection:'users',context:{cmsBootstrap:true},data:{email,password}});adminId=user.id;
+ const login=await call('/api/users/login','POST',{email,password});assert.equal(login.status,200);const {token}=await login.json();assert.ok(token);check('administrator login');
+ const doc=await cms.create({collection:'projects',data:{name:'CMS 测试草稿',english:'CMS Test',slug:'cms-test-draft',category:'测试',status:'测试',description:'测试草稿不可公开',order:999,_status:'draft'}});projectId=doc.id;
+ const anonymous=await (await call('/api/projects?where[slug][equals]=cms-test-draft')).json();assert.equal(anonymous.docs.length,0);
+ const draft=await (await call('/api/projects?draft=true&where[slug][equals]=cms-test-draft')).json();assert.equal(draft.docs.length,0);
+ assert.equal((await call('/works/cms-test-draft')).status,404);check('unpublished project hidden in API and direct page');
+ const publish=await call(`/api/projects/${doc.id}`,'PATCH',{_status:'published'},token);assert.equal(publish.status,200);
+ const published=await (await call('/api/projects?where[slug][equals]=cms-test-draft')).json();assert.equal(published.docs.length,1);assert.equal((await call('/works/cms-test-draft')).status,200);check('publishing makes project visible without rebuilding');
+ await cms.update({collection:'projects',id:doc.id,draft:true,data:{name:'秘密草稿名称',_status:'draft'}});
+ const publicDoc=await (await call(`/api/projects/${doc.id}?draft=true`)).json();assert.notEqual(publicDoc.name,'秘密草稿名称');
+ const preview=await call('/preview/project/cms-test-draft','GET',undefined,token);assert.equal(preview.status,200);assert.match(await preview.text(),/秘密草稿名称/);check('draft changes stay private and authenticated preview shows draft');
+ assert.ok([401,403].includes((await call('/api/projects/versions')).status));assert.ok([401,403].includes((await call('/api/globals/site-settings/versions')).status));check('content history is administrator-only');
+ const original=await cms.findGlobal({slug:'site-settings'});
+ await cms.updateGlobal({slug:'site-settings',draft:true,data:{title:'秘密首页草稿',_status:'draft'}});
+ const settings=await (await call('/api/globals/site-settings?draft=true')).json();assert.notEqual(settings.title,'秘密首页草稿');
+ await cms.updateGlobal({slug:'site-settings',data:{...original,_status:'published'}});check('site settings draft cannot leak to visitors');
+ const form=new FormData();const bytes=await import('node:fs/promises').then(fs=>fs.readFile('public/video/hero-poster.jpg'));
+ form.append('file',new Blob([bytes],{type:'image/jpeg'}),'cms-test-image.jpg');form.append('_payload',JSON.stringify({alt:'测试上传图片'}));
+ const upload=await fetch(base+'/api/media',{method:'POST',headers:{Authorization:`JWT ${token}`},body:form});assert.equal(upload.status,201);const media=(await upload.json()).doc;mediaId=media.id;assert.ok(media.width&&media.height&&media.filename);check('administrator image upload with dimensions and optimized sizes');
+ const rows=[{media:media.id,alt:'第二张',caption:'B',kind:'设计效果图'},{media:media.id,alt:'第一张',caption:'A',kind:'现场照片'}];
+ assert.equal((await call(`/api/projects/${doc.id}`,'PATCH',{gallery:rows,_status:'published'},token)).status,200);
+ const gallery=(await (await call(`/api/projects/${doc.id}`)).json()).gallery;assert.deepEqual(gallery.map((r:{caption:string})=>r.caption),['B','A']);check('gallery ordering and image kinds persist');
+ await mkdir('.cms',{recursive:true});await writeFile('.cms/test-session.json',JSON.stringify({email,password,token}));check('temporary browser-test session prepared (not logged or committed)');
+ // Browser tests consume the session. Cleanup runs separately after they finish.
+ await writeFile('.cms/test-cleanup.json',JSON.stringify({adminId,projectId,mediaId}));
+}catch(error){if(projectId)await cms.delete({collection:'projects',id:projectId});if(mediaId)await cms.delete({collection:'media',id:mediaId});if(adminId)await cms.delete({collection:'users',id:adminId});throw error}finally{await cms.destroy()}

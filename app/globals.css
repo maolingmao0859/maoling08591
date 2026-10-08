@@ -28,3 +28,4 @@
 .mr-hero-person.has-image{width:48%;height:86%;bottom:65px}
 @media(max-width:900px){.mr-hero-person.has-image{width:68%;height:80%;bottom:100px}}
 @media(max-width:600px){.mr-hero-person.has-image{width:96%;height:72%;bottom:135px}}
+.preview-banner{background:#414c3d;color:#eae6dc;padding:12px 6%;font-size:12px;margin:0}.mr-home .editorial-image img{max-width:none}
