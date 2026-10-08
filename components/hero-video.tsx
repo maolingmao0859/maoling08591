@@ -1,0 +1,9 @@
+'use client';
+import {useEffect,useRef,useState} from 'react';
+export default function HeroVideo({src,poster,pauseLabel,playLabel}:{src:string;poster:string;pauseLabel:string;playLabel:string}){
+ const video=useRef<HTMLVideoElement>(null);const [allowed,setAllowed]=useState(false);const [playing,setPlaying]=useState(false);const [failed,setFailed]=useState(false);const manualPause=useRef(false);
+ useEffect(()=>{const query=matchMedia('(prefers-reduced-motion: reduce)');const update=()=>{setAllowed(!query.matches);if(query.matches)video.current?.pause()};update();query.addEventListener('change',update);return()=>query.removeEventListener('change',update)},[]);
+ useEffect(()=>{if(!allowed)return;const el=video.current;if(!el)return;let visible=true;const sync=()=>{if(visible&&!document.hidden&&!manualPause.current)el.play().catch(()=>setPlaying(false));else el.pause()};const observer=new IntersectionObserver(([entry])=>{visible=entry.isIntersecting;sync()},{threshold:.1});observer.observe(el);document.addEventListener('visibilitychange',sync);return()=>{observer.disconnect();document.removeEventListener('visibilitychange',sync);el.pause()}},[allowed]);
+ function toggle(){const el=video.current;if(!el)return;if(playing){manualPause.current=true;el.pause()}else{manualPause.current=false;el.play().catch(()=>setPlaying(false))}}
+ return <><div className="hero-video-background" style={{backgroundImage:`url(${poster})`}} aria-hidden="true">{allowed&&<video ref={video} src={src} poster={poster} muted loop playsInline preload="metadata" onPlay={()=>setPlaying(true)} onPause={()=>setPlaying(false)} onError={()=>{setFailed(true);setPlaying(false)}}/>}<div className="hero-video-shade"/></div>{allowed&&!failed&&<button type="button" className="hero-video-control" onClick={toggle} aria-label={playing?pauseLabel:playLabel}>{playing?'Ⅱ':'▷'} <span>{playing?pauseLabel:playLabel}</span></button>}</>;
+}
