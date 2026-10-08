@@ -1,0 +1,9 @@
+export type ProjectImage = {src:string;alt:string;caption:string;kind:'现场照片'|'设计效果图'|'概念示意'|'总平面图';width:number;height:number};
+export type Project = {slug:string;name:string;english:string;category:string;status:string;image:string;imageNote:string;description:string;material:string;location:string;year:string;area:string;role:string;closing:string;gallery:ProjectImage[]};
+// 当前上传包超过传输上限，素材尚未导入。不要把占位升级为实景。
+export const projects:Project[] = [
+{slug:'yunting',name:'梵之·云汀洞穴咖啡',english:'Fanzhi · Yunting Cave Café',category:'Spatial Design / Nature Experience',status:'Built / 已落地',image:'',imageNote:'项目真实照片待导入',description:'以天然洞穴为起点，让水、光、岩石与手工构筑共同形成一处独特的自然体验空间。',material:'水 / 光 / 岩石 / 手工构筑',location:'待确认',year:'待确认',area:'待确认',role:'待确认',closing:'从天然洞穴出发，让空间成为自然体验的一部分。',gallery:[]},
+{slug:'shanye-camp',name:'山野森林营地',english:'Shanye Forest Camp',category:'Outdoor Experience / Landscape Design',status:'项目状态待确认',image:'',imageNote:'项目素材待导入',description:'在森林与山坡之间，以自然材料、空间装置和户外活动，创造一种自由、轻松的山野体验方式。',material:'森林 / 自然材料 / 户外体验',location:'待确认',year:'待确认',area:'待确认',role:'待确认',closing:'让活动与场所相遇，让山野回到体验的中心。',gallery:[]},
+{slug:'fanjing-resort',name:'梵净好梦度假村',english:'Fanjing Dream Resort',category:'Hospitality / Resort Concept',status:'方案 / 概念展示 · 建设状态待确认',image:'',imageNote:'设计方案素材待导入 · 不代表已建成',description:'从山地村落的自然肌理出发，让建筑、竹林、溪流与度假生活重新建立联系。',material:'山地村落 / 竹林 / 溪流',location:'待确认',year:'待确认',area:'待确认',role:'待确认',closing:'在村落肌理中，探索建筑与自然共同生长的可能。',gallery:[]},
+{slug:'annori-retreat',name:'安诺里民宿',english:'Annori Retreat',category:'Hospitality / Interior Design',status:'设计展示 · 建设状态待确认',image:'',imageNote:'室内设计素材待导入 · 不代表已建成',description:'以克制的材料、温暖的光线和山地景观，构建安静而有层次的度假空间。',material:'材质 / 光线 / 家具尺度 / 山地景观',location:'待确认',year:'待确认',area:'待确认',role:'待确认',closing:'以安静的尺度，回应光线与景观。',gallery:[]}
+];
