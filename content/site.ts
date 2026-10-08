@@ -8,7 +8,7 @@ export const site = {
   email: '', wechat: '', instagram: '', location: 'Guizhou, China', hero: '',
   navigation: [{href:'/about',label:'About'},{href:'/works',label:'Works'},{href:'/journal',label:'Journal'},{href:'/contact',label:'Contact'}],
   home: {
-    hero: {video:'/video/mrcat-hero.mp4',poster:'/video/hero-poster.jpg',pauseLabel:'暂停背景视频',playLabel:'播放背景视频',portrait:'/portrait/mr-cat-hero.png',portraitAlt:'MR.CAT 本人全身肖像',portraitNote:'',disciplines:'Space / Nature / Experience',index:'PORTFOLIO — 01 / 06',scroll:'SCROLL TO DISCOVER'},
+    hero: {video:'/video/mrcat-hero.mp4',poster:'/video/hero-poster.jpg',pauseLabel:'暂停背景视频',playLabel:'播放背景视频',portrait:'/portrait/mr-cat-seated.png',portraitAlt:'MR.CAT 无头坐姿视觉创作，白色椅子与悬浮眼镜',portraitNote:'',disciplines:'Space / Nature / Experience',index:'PORTFOLIO — 01 / 06',scroll:'SCROLL TO DISCOVER'},
     philosophy: {label:'ABOUT THE PRACTICE',title:'我以空间为起点，\n向自然、体验与影像延伸。',text:'长期关注文旅场景、自然环境与人的感受关系。\n在克制与真实之间，寻找一种更有温度的表达。',english:'Starting from space, extending toward nature, experience and image.',note:'',image:'',imageAlt:'',imageNote:''},
     works: {label:'SELECTED WORKS / 代表作品',title:'Spaces with a sense of place.',link:'查看作品档案',note:'关于空间、自然与体验的持续实践。'},
     about: {label:'ABOUT / 关于我',title:'A Designer.\nAn Observer.\nAn Explorer.',image:'',imageAlt:'本人旅行或工作纪实照片',imageNote:'本人旅行 / 工作纪实照片待提供',link:'认识 MR.CAT'},
